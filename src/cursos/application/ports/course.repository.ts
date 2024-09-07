@@ -4,6 +4,8 @@ import { Curso } from 'src/cursos/domain/course';
 export abstract class CursoRepository {
   abstract salvar(curso: Curso): Promise<Curso>;
   abstract listar(): Promise<Curso[]>;
-  abstract adicionarAluno(aluno: Aluno): void;
-  abstract buscarPorId(id: string): Promise<Curso | undefined> 
+  abstract adicionarAluno(cursoId: string, aluno: Aluno): string;
+  abstract buscarPorId(id: string): Promise<Curso | undefined>;
+  abstract listarAlunosMatriculados(cursoId: string): Promise<Aluno[]>;
+  abstract listarAlunosNaListaDeEspera(cursoId: string): Promise<Aluno[]>;
 }

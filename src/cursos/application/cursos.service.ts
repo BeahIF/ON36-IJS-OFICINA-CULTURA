@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreateCursoDto } from '../presenters/http/dto/create-curso.dto';
 import { UpdateCursoDto } from '../presenters/http/dto/update-curso.dto';
 import { CursoFactory } from '../domain/factories/curso.factory';
 import { CreateCursoCommand } from './commands/create-course-command';
@@ -17,22 +16,39 @@ export class CursosService {
     const novoCurso = this.cursoFactory.criar(
       createCursoCommand.nome,
       createCursoCommand.description,
-     
     );
 
     return this.cursoRepository.salvar(novoCurso);
   }
-// nao sei onde faltou esse adicionarAluno
-  async matricularAluno(cursoId: string, aluno: Aluno): Promise<Curso> {
+  // nao sei onde faltou esse adicionarAluno
+  async matricularAluno(
+    cursoId: string,
+    aluno: Aluno,
+  ): Promise<{ curso: Curso; mensagem: string }> {
+    console.log(aluno);
     const curso = await this.cursoRepository.buscarPorId(cursoId);
     if (!curso) {
       throw new Error('Curso não encontrado');
     }
-    curso.adicionarAluno(aluno);
-    return this.cursoRepository.salvar(curso);
+    const status = this.cursoRepository.adicionarAluno(cursoId, aluno);
+
+    // Define a mensagem com base no status retornado
+    const mensagem =
+      status === 'listaDeEspera'
+        ? `Aluno ${aluno.id} adicionado à lista de espera do curso.`
+        : `Aluno ${aluno.id} matriculado com sucesso no curso.`;
+
+    // Retorna o curso e a mensagem apropriada
+    return { curso: await this.cursoRepository.salvar(curso), mensagem };
   }
 
- 
+  async listarAlunosMatriculados(cursoId: string): Promise<Aluno[]> {
+    return this.cursoRepository.listarAlunosMatriculados(cursoId);
+  }
+
+  async listarAlunosNaListaDeEspera(cursoId: string): Promise<Aluno[]> {
+    return this.cursoRepository.listarAlunosNaListaDeEspera(cursoId);
+  }
   findAll() {
     return `This action returns all cursos`;
   }
